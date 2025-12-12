@@ -7,9 +7,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Polyfill process.env for the Gemini SDK and general usage
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
-      'process.env': JSON.stringify(env)
+      // Inject the API Key safely. Supports both standard API_KEY and VITE_API_KEY prefixes.
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || ''),
     },
   };
 });

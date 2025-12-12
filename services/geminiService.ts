@@ -9,8 +9,16 @@ const getAiClient = () => {
   
   // Safe check for API Key
   const apiKey = process.env.API_KEY;
+  
+  // Debug log for development/deployment troubleshooting
+  if (!apiKey) {
+    console.warn("Gemini Service: API_KEY is missing or empty. Please check your Vercel Environment Variables.");
+  } else {
+    // Log masked key to verify it's loaded (e.g., "AIzaSy...")
+    console.log(`Gemini Service: API Key loaded (${apiKey.substring(0, 5)}...)`);
+  }
+
   if (!apiKey || apiKey === "undefined") {
-    console.warn("Gemini API Key is missing. Chat features will be disabled.");
     return null;
   }
   
