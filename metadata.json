@@ -1,0 +1,7 @@
+{
+  "name": "AliTaram",
+  "description": "Premium mobility and rehabilitation solutions.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
