@@ -1,7 +1,27 @@
 import { GoogleGenAI } from "@google/genai";
 import { MOCK_PRODUCTS } from '../constants';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization holder
+let aiClient: GoogleGenAI | null = null;
+
+const getAiClient = () => {
+  if (aiClient) return aiClient;
+  
+  // Safe check for API Key
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey === "undefined") {
+    console.warn("Gemini API Key is missing. Chat features will be disabled.");
+    return null;
+  }
+  
+  try {
+    aiClient = new GoogleGenAI({ apiKey });
+    return aiClient;
+  } catch (e) {
+    console.error("Failed to initialize Gemini Client:", e);
+    return null;
+  }
+};
 
 // Build a concise knowledge base string
 const KNOWLEDGE_BASE = JSON.stringify(MOCK_PRODUCTS.map(p => ({
@@ -37,6 +57,13 @@ This allows seated entry. Would you like to book a quick video consult to check 
 
 export const sendMessageToGemini = async (history: {role: string, parts: string}[], message: string): Promise<string> => {
   try {
+    const ai = getAiClient();
+    
+    if (!ai) {
+      // Graceful fallback if no API key is present
+      return "I apologize, but I am currently offline due to a configuration issue (Missing API Key). Please contact support or browse our products manually.";
+    }
+
     // Map internal history format to Gemini SDK format
     const chatHistory = history.map(h => ({
       role: h.role === 'model' ? 'model' : 'user',

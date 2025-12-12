@@ -74,7 +74,9 @@ const ChatAgent: React.FC = () => {
         
         // 3. Call API
         const rawResponse = await sendMessageToGemini(apiHistory, textToSend);
-        const responseText = rawResponse || "I apologize, I didn't quite catch that. Could you rephrase?";
+        
+        // Ensure we have a string to avoid TS errors
+        const responseText = typeof rawResponse === 'string' ? rawResponse : "I didn't get that.";
         
         // 4. Parse Response
         const productRegex = /\[RECOMMEND:\s*([^\]]+)\]/g;
@@ -82,10 +84,13 @@ const ChatAgent: React.FC = () => {
         const suggestions: Product[] = [];
         
         let match;
+        // Use a loop that is safe
         while ((match = productRegex.exec(responseText)) !== null) {
-            const pid = match[1].trim();
-            const p = MOCK_PRODUCTS.find(prod => prod.id === pid);
-            if (p) suggestions.push(p);
+            if (match && match[1]) {
+                const pid = match[1].trim();
+                const p = MOCK_PRODUCTS.find(prod => prod.id === pid);
+                if (p) suggestions.push(p);
+            }
         }
         
         cleanText = cleanText.replace(productRegex, '').trim();
